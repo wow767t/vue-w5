@@ -35,13 +35,17 @@ const app = Vue.createApp({
                     "address": ""
                 },
                 "message": ""
+            },
+            orderPrice:{
+                total: null,
+                final_total: null
             }
         }
     },
     methods: {
         // get products data
         getProducts() {
-            const url = `https://vue3-course-api.hexschool.io/v2/api/scott/products/all`
+            const url = `${apiUrl}api/${apiPath}/products/all`
             axios.get(url)
                 .then(res => {
                     // console.log(res)
@@ -52,20 +56,23 @@ const app = Vue.createApp({
                 })
         },
         getCart() {
-            const url = `https://vue3-course-api.hexschool.io/v2/api/scott/cart`
+            const url = `${apiUrl}api/${apiPath}/cart`
             axios.get(url)
                 .then(res => {
                     // console.log(res)
                     this.cart = res.data.data.carts
+                    const {total, final_total} = res.data.data
+                    this.orderPrice.total = total;
+                    this.orderPrice.final_total = final_total
                 })
                 .catch(err => {
                     console.error(err);
                 })
         },
         addToCart(id, qty = 1) {
-            console.log(id) //product id
+            // console.log(id) //product id
             // https://vue3-course-api.hexschool.io/v2/api/scott/cart
-            const url = `https://vue3-course-api.hexschool.io/v2/api/scott/cart`
+            const url = `${apiUrl}api/${apiPath}/cart`
             const data = {
                 "data": {
                     "product_id": id,
@@ -76,8 +83,7 @@ const app = Vue.createApp({
             axios.post(url, data)
                 .then(res => {
                     // console.log('axios',id)
-
-                    console.log('add to cart', res)
+                    // console.log('add to cart', res)
                     this.getCart()
                     this.isLoading = ''
                     alert(res.data.message)
@@ -88,7 +94,7 @@ const app = Vue.createApp({
 
         },
         updateCartItem(item) {
-            const url = `https://vue3-course-api.hexschool.io/v2/api/scott/cart/${item.id}`
+            const url = `${apiUrl}api/${apiPath}/cart/${item.id}`
             const data = {
                 "data": {
                     "product_id": item.product.id,
@@ -100,6 +106,7 @@ const app = Vue.createApp({
                 .then(res => {
                     // this.getCart()
                     // this.isLoading = ''
+                    this.getCart()
                     console.log(res.data.message)
                 })
                 .catch(err => {
@@ -116,7 +123,7 @@ const app = Vue.createApp({
             // https://vue3-course-api.hexschool.io/v2/api/scott/cart/%22-Mw51OkPVZEHzplix6y1%22
             // console.log('remove', id)
             this.isLoading = id
-            axios.delete(`https://vue3-course-api.hexschool.io/v2/api/scott/cart/${id}`)
+            axios.delete(`${apiUrl}api/${apiPath}/cart/${id}`)
                 .then(res => {
                     console.log(res)
                     alert(res.data.message)
@@ -128,7 +135,7 @@ const app = Vue.createApp({
                 })
         },
         clearCart() {
-            axios.delete(`https://vue3-course-api.hexschool.io/v2/api/scott/carts`)
+            axios.delete(`${apiUrl}api/${apiPath}/carts`)
                 .then(res => {
                     console.log(res)
                     alert(res.data.message)
@@ -143,17 +150,12 @@ const app = Vue.createApp({
             console.log('submitOrder')
             const data = {
                 "data": {
-                    "user": {
-                        "name": "test",
-                        "email": "test@gmail.com",
-                        "tel": "0912346768",
-                        "address": "kaohsiung"
-                    },
-                    "message": "這是留言"
+                    ...this.formInfo
+                    
                 }
             }
-            //           https://vue3-course-api.hexschool.io/v2/api/scott/order
-            const url = `https://vue3-course-api.hexschool.io/v2/api/scott/order`
+            console.log(data)
+            const url = `${apiUrl}api/${apiPath}/order`
             axios.post(url,data)
             .then(res => {
                 console.log(res)
